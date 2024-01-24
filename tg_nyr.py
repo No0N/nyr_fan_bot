@@ -1,0 +1,152 @@
+import telebot
+import urllib.request
+import xml.etree.ElementTree as ET
+import time
+import sqlite3
+import pytz
+from datetime import datetime, timedelta
+
+# Импортируем xml_url, token_tg и chat_id из файла cons.py
+from cons import xml_url, token_tg, chat_id
+
+bot = telebot.TeleBot(token_tg)
+
+def create_table_if_not_exists(conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            pubDate TEXT,
+            url TEXT,
+            post TEXT
+        )
+    ''')
+    conn.commit()
+
+def insert_data(conn, title, pub_date, video_url, post_content):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO videos (title, pubDate, url, post) VALUES (?, ?, ?, ?)
+    ''', (title, pub_date, video_url, post_content))
+    conn.commit()
+
+def update_post_status(conn, video_id):
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE videos SET post = 'X' WHERE id = ?
+    ''', (video_id,))
+    conn.commit()
+
+def check_if_record_exists(conn, title, pub_date, video_url, post_content):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT id FROM videos WHERE url=?
+    ''', (video_url,))
+    return cursor.fetchone() is not None
+
+
+def send_message_to_channel(schedule_time):
+    try:
+        conn = sqlite3.connect(database_file)
+        cursor = conn.cursor()
+
+        # Выбираем первую запись с пустым полем post
+        cursor.execute('SELECT id, url FROM videos WHERE post IS NULL OR post = "" LIMIT 1')
+        row = cursor.fetchone()
+
+        print(f"Row from database: {row}")
+
+        if row is not None:
+            video_id, video_url = row  # Поля с ID и URL видео
+
+            # Получаем текущее время в Московском времени
+            current_time = datetime.now(pytz.timezone('Europe/Moscow'))
+
+            # Планируем отправку сообщения в заданное время
+            if current_time >= schedule_time:
+                # Отправляем сообщение с содержимым поля link
+                bot.send_message(chat_id=chat_id, text=video_url)
+                print("Сообщение успешно отправлено в канал.")
+
+                # Проставляем в поле post значение 'X' для выбранной строки
+                update_post_status(conn, video_id)
+            else:
+                print("Время для отправки еще не наступило.")
+
+        else:
+            print("Нет записей с пустым полем post.")
+
+        conn.close()
+
+    except Exception as e:
+        print(f"Ошибка при отправке сообщения в канал: {e}")
+
+
+def update_post_status(conn, video_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE videos SET post = 'X' WHERE id = ?
+        ''', (video_id,))
+        conn.commit()
+        print(f"Статус 'X' успешно проставлен для video_id={video_id}")
+    except Exception as e:
+        print(f"Ошибка при обновлении статуса 'X' для video_id={video_id}: {e}")
+        
+
+def parse_xml_and_save_to_db(url, db_file):
+    conn = sqlite3.connect(db_file)
+    create_table_if_not_exists(conn)
+
+    while True:
+        # Получаем данные XML по ссылке
+        response = urllib.request.urlopen(url)
+        xml_data = response.read()
+
+        # Парсим XML
+        root = ET.fromstring(xml_data)
+
+        # Счетчик добавленных записей
+        added_rows_count = 0
+
+        # Проходим по элементам и записываем данные в базу данных
+        for entry in root.findall('.//{http://www.w3.org/2005/Atom}entry'):
+            title = entry.find('{http://www.w3.org/2005/Atom}title').text
+            pub_date = entry.find('{http://www.w3.org/2005/Atom}published').text
+            video_url = entry.find('{http://www.w3.org/2005/Atom}link').attrib['href']
+
+            # Проверяем наличие элемента <content>
+            content_element = entry.find('{http://www.w3.org/2005/Atom}content')
+            post_content = content_element.text if content_element is not None else ""
+
+            # Проверяем, существует ли запись с такими же данными в базе данных
+            # и проверяем, содержатся ли ключевые слова в заголовке
+            if not check_if_record_exists(conn, title, pub_date, video_url, post_content) and \
+               ("NHL Highlights" in title) and ("Rangers" in title):
+                # Выводим информацию в формате ключ:значение
+                print(f"Title: {title}")
+                print(f"pubDate: {pub_date}")
+                print(f"url: {video_url}")
+                print(f"post: {post_content}")
+                print()
+
+                # Записываем данные в базу данных
+                insert_data(conn, title, pub_date, video_url, post_content)
+                added_rows_count += 1
+
+        send_message_to_channel(scheduled_datetime)
+
+        # Ждем 5 минут перед следующим опросом
+        time.sleep(300)  # 300 секунд = 5 минут
+
+    conn.close()
+
+if __name__ == "__main__":
+    database_file = "videos_database.db"
+    
+    # Указываем время в MSK для отправки сообщения (в формате HH:MM)
+    scheduled_time = datetime.strptime("09:30", "%H:%M").time()
+    scheduled_datetime = datetime.combine(datetime.today(), scheduled_time).astimezone(pytz.timezone('Europe/Moscow'))
+
+    parse_xml_and_save_to_db(xml_url, database_file)
