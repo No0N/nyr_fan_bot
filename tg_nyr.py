@@ -5,8 +5,6 @@ import time
 import sqlite3
 import pytz
 from datetime import datetime, timedelta
-
-# Импортируем xml_url, token_tg и chat_id из файла cons.py
 from cons import xml_url, token_tg, chat_id
 
 bot = telebot.TeleBot(token_tg)
@@ -52,21 +50,25 @@ def send_message_to_channel(schedule_time):
         cursor = conn.cursor()
 
         # Выбираем первую запись с пустым полем post
-        cursor.execute('SELECT id, url FROM videos WHERE post IS NULL OR post = "" LIMIT 1')
+        cursor.execute('SELECT id, title, url FROM videos WHERE post IS NULL OR post = "" LIMIT 1')
         row = cursor.fetchone()
 
         print(f"Row from database: {row}")
 
         if row is not None:
-            video_id, video_url = row  # Поля с ID и URL видео
+            video_id, video_title, video_url = row  # Поля с ID, названием и URL видео
 
             # Получаем текущее время в Московском времени
             current_time = datetime.now(pytz.timezone('Europe/Moscow'))
 
             # Планируем отправку сообщения в заданное время
             if current_time >= schedule_time:
-                # Отправляем сообщение с содержимым поля link
-                bot.send_message(chat_id=chat_id, text=video_url)
+                # Убираем дату из названия
+                video_title_cleaned = video_title.split(' - ')[0]
+
+                # Отправляем сообщение с названием и ссылкой
+                message_text = f"{video_title_cleaned}\n\n{video_url}"
+                bot.send_message(chat_id=chat_id, text=message_text)
                 print("Сообщение успешно отправлено в канал.")
 
                 # Проставляем в поле post значение 'X' для выбранной строки
