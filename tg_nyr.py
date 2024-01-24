@@ -5,7 +5,7 @@ import time
 import sqlite3
 import pytz
 from datetime import datetime, timedelta
-from cons import xml_url, token_tg, chat_id
+from cons import xml_url, token_tg, chat_id, chat_id_tmp
 
 bot = telebot.TeleBot(token_tg)
 
@@ -66,10 +66,10 @@ def send_message_to_channel(schedule_time):
                 # Убираем дату из названия
                 video_title_cleaned = video_title.split(' - ')[0]
 
-                # Отправляем сообщение с названием и ссылкой
-                message_text = f"{video_title_cleaned}\n\n{video_url}"
-                bot.send_message(chat_id=chat_id, text=message_text)
-                print("Сообщение успешно отправлено в канал.")
+                # Отправляем сообщение с названием и ссылкой в основной чат
+                message_text_main_chat = f"{video_title_cleaned}\n\n{video_url}"
+                bot.send_message(chat_id=chat_id, text=message_text_main_chat)
+                print("Сообщение успешно отправлено в основной чат.")
 
                 # Проставляем в поле post значение 'X' для выбранной строки
                 update_post_status(conn, video_id)
@@ -79,11 +79,17 @@ def send_message_to_channel(schedule_time):
         else:
             print("Нет записей с пустым полем post.")
 
+            # Отправляем сообщение с текущим временем во временный чат
+            current_time_tmp_chat = current_time.strftime("%H:%M:%S")
+            message_text_tmp_chat = f"Текущее время: {current_time_tmp_chat}"
+            bot.send_message(chat_id=chat_id_tmp, text=message_text_tmp_chat)
+            print("Сообщение с текущим временем успешно отправлено во временный чат.")
+
         conn.close()
 
     except Exception as e:
-        print(f"Ошибка при отправке сообщения в канал: {e}")
-
+        print(f"Ошибка при отправке сообщения: {e}")
+        
 
 def update_post_status(conn, video_id):
     try:
