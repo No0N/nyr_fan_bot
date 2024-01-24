@@ -55,11 +55,11 @@ def send_message_to_channel(schedule_time):
 
         print(f"Row from database: {row}")
 
+        # Получаем текущее время в Московском времени
+        current_time = datetime.now(pytz.timezone('Europe/Moscow'))
+
         if row is not None:
             video_id, video_title, video_url = row  # Поля с ID, названием и URL видео
-
-            # Получаем текущее время в Московском времени
-            current_time = datetime.now(pytz.timezone('Europe/Moscow'))
 
             # Планируем отправку сообщения в заданное время
             if current_time >= schedule_time:
