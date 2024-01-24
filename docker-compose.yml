@@ -1,6 +1,0 @@
-version: '3'
-services:
-  tg_nyr_fan:
-    image: tg_nyr
-    container_name: tg_nyr
-    restart: always
