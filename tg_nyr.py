@@ -120,8 +120,7 @@ def parse_xml_and_save_to_db(url, db_file):
             content_element = entry.find('{http://www.w3.org/2005/Atom}content')
             post_content = content_element.text if content_element is not None else ""
 
-            # Проверяем, существует ли запись с такими же данными в базе данных
-            # и проверяем, содержатся ли ключевые слова в заголовке
+            # Проверяем, существует ли запись с такими же данными в базе данных, и проверяем, содержатся ли ключевые слова в заголовке
             if not check_if_record_exists(conn, title, pub_date, video_url, post_content) and \
                ("NHL Highlights" in title) and ("Rangers" in title):
                 # Выводим информацию в формате ключ:значение
