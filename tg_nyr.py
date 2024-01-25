@@ -79,12 +79,6 @@ def send_message_to_channel(schedule_time):
         else:
             print("Нет записей с пустым полем post.")
 
-            # Отправляем сообщение с текущим временем во временный чат
-            current_time_tmp_chat = current_time.strftime("%H:%M:%S")
-            message_text_tmp_chat = f"Текущее время: {current_time_tmp_chat}"
-            bot.send_message(chat_id=chat_id_tmp, text=message_text_tmp_chat)
-            print("Сообщение с текущим временем успешно отправлено во временный чат.")
-
         conn.close()
 
     except Exception as e:
