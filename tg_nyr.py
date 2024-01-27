@@ -43,7 +43,6 @@ def check_if_record_exists(conn, title, pub_date, video_url, post_content):
     ''', (video_url,))
     return cursor.fetchone() is not None
 
-
 def send_message_to_channel(schedule_time):
     try:
         conn = sqlite3.connect(database_file)
@@ -74,28 +73,21 @@ def send_message_to_channel(schedule_time):
                 # Проставляем в поле post значение 'X' для выбранной строки
                 update_post_status(conn, video_id)
             else:
-                print(f"Время для отправки еще не наступило. CT = {current_time}, ST = {schedule_time}")
+                print("Время для отправки еще не наступило.")
 
         else:
             print("Нет записей с пустым полем post.")
+
+            # Отправляем сообщение с текущим временем во временный чат
+            current_time_tmp_chat = current_time.strftime("%H:%M:%S")
+            message_text_tmp_chat = f"Текущее время: {current_time_tmp_chat}"
+            bot.send_message(chat_id=chat_id_tmp, text=message_text_tmp_chat)
+            print("Сообщение с текущим временем успешно отправлено во временный чат.")
 
         conn.close()
 
     except Exception as e:
         print(f"Ошибка при отправке сообщения: {e}")
-        
-
-def update_post_status(conn, video_id):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE videos SET post = 'X' WHERE id = ?
-        ''', (video_id,))
-        conn.commit()
-        print(f"Статус 'X' успешно проставлен для video_id={video_id}")
-    except Exception as e:
-        print(f"Ошибка при обновлении статуса 'X' для video_id={video_id}: {e}")
-        
 
 def parse_xml_and_save_to_db(url, db_file):
     conn = sqlite3.connect(db_file)
@@ -147,7 +139,9 @@ if __name__ == "__main__":
     database_file = "videos_database.db"
     
     # Указываем время в MSK для отправки сообщения (в формате HH:MM)
-    scheduled_time = datetime.strptime("09:30", "%H:%M").time()
-    scheduled_datetime = datetime.combine(datetime.today(), scheduled_time).astimezone(pytz.timezone('Europe/Moscow'))
+    scheduled_time_utc = datetime.strptime("09:30", "%H:%M").time()
+    
+    # Конвертируем в московское время
+    scheduled_datetime = datetime.combine(datetime.today(), scheduled_time_utc).astimezone(pytz.timezone('Europe/Moscow'))
 
     parse_xml_and_save_to_db(xml_url, database_file)
