@@ -74,7 +74,7 @@ def send_message_to_channel(schedule_time):
                 # Проставляем в поле post значение 'X' для выбранной строки
                 update_post_status(conn, video_id)
             else:
-                print("Время для отправки еще не наступило.")
+                print(f"Время для отправки еще не наступило. CT = {current_time}, ST = {schedule_time}")
 
         else:
             print("Нет записей с пустым полем post.")
