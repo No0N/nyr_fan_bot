@@ -57,6 +57,8 @@ def send_message_to_channel(schedule_time):
         # Получаем текущее время в Московском времени
         current_time = datetime.now(pytz.timezone('Europe/Moscow'))
 
+        print(f"CT={current_time}, ST={schedule_time}, STU={scheduled_time_utc}")
+        
         if row is not None:
             video_id, video_title, video_url = row  # Поля с ID, названием и URL видео
 
