@@ -155,7 +155,7 @@ if __name__ == "__main__":
     database_file = "videos_database.db"
     
     # Указываем время в MSK для отправки сообщения (в формате HH:MM)
-    scheduled_time_utc = datetime.strptime("09:00", "%H:%M").time()
+    scheduled_time_utc = datetime.strptime("01:00", "%H:%M").time()
     
     # Конвертируем в московское время
     scheduled_datetime = datetime.combine(datetime.today(), scheduled_time_utc).astimezone(pytz.timezone('Europe/Moscow'))
