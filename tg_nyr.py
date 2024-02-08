@@ -68,10 +68,6 @@ def send_message_to_channel(schedule_time):
                 # Убираем дату из названия
                 video_title_cleaned = video_title.split(' - ')[0]
                 
-                jojotime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(jojotime)
-                print(f"CT={current_time}, ST={schedule_time}") 
-
                 # Отправляем сообщение с названием и ссылкой в основной чат
                 message_text_main_chat = f"{video_title_cleaned}\n\n{video_url}"
                 bot.send_message(chat_id=chat_id, text=message_text_main_chat)
@@ -87,10 +83,6 @@ def send_message_to_channel(schedule_time):
 
         else:
             print("Нет записей с пустым полем post.")
-
-            jojotime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(jojotime)
-            print(f"CT={current_time}, ST={schedule_time}") 
 
         conn.close()
 
@@ -163,7 +155,7 @@ if __name__ == "__main__":
     database_file = "videos_database.db"
     
     # Указываем время в MSK для отправки сообщения (в формате HH:MM)
-    scheduled_time_utc = datetime.strptime("01:30", "%H:%M").time()
+    scheduled_time_utc = datetime.strptime("09:00", "%H:%M").time()
     
     # Конвертируем в московское время
     scheduled_datetime = datetime.combine(datetime.today(), scheduled_time_utc).astimezone(pytz.timezone('Europe/Moscow'))
