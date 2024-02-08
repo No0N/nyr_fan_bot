@@ -56,8 +56,8 @@ def send_message_to_channel(schedule_time):
 
         # Получаем текущее время в Московском времени
         current_time = datetime.now(pytz.timezone('Europe/Moscow'))
-
-        print(f"CT={current_time}, ST={schedule_time}, STU={scheduled_time_utc}")
+        
+        print(f"CT={current_time}, ST={schedule_time}, STU={scheduled_time_utc}") 
         
         if row is not None:
             video_id, video_title, video_url = row  # Поля с ID, названием и URL видео
@@ -79,6 +79,8 @@ def send_message_to_channel(schedule_time):
 
         else:
             print("Нет записей с пустым полем post.")
+            jojotime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(jojotime)
 
             # Отправляем сообщение с текущим временем во временный чат
             current_time_tmp_chat = current_time.strftime("%H:%M:%S")
