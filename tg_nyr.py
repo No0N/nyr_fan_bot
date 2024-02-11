@@ -70,7 +70,7 @@ def send_message_to_channel():
 
                 update_post_status(conn, video_id)
             else:
-                print("Нет записей с пустым полем post.")
+                print("Нет записей с пустым полем post. ")
 
             conn.close()
         else:
