@@ -58,6 +58,7 @@ def send_message_to_channel():
             row = cursor.fetchone()
 
             print(f"Row from database: {row}")
+            life_t = 1
 
             if row is not None:
                 video_id, video_title, video_url = row
