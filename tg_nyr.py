@@ -74,7 +74,7 @@ def send_message_to_channel():
 
             conn.close()
         else:
-            print(f"Время не в заданном диапазоне для отправки сообщения. CT {current_time}, NT {datetime.now()}")
+            print(f"Время не в заданном диапазоне для отправки сообщения.")
 
     except Exception as e:
         print(f"Ошибка при отправке сообщения: {e}")
