@@ -101,7 +101,7 @@ def parse_xml_and_save_to_db(url, db_file):
                 post_content = content_element.text if content_element is not None else ""
 
                 if not check_if_record_exists(conn, title, pub_date, video_url, post_content) and \
-                    ("NHL Highlights" in title) and ("Rangers" in title):
+                    ("NHL Highlights" in title or "NHL Stadium" in title) and ("Rangers" in title):
 
                     print(f"Title: {title}")
                     print(f"pubDate: {pub_date}")
