@@ -5,7 +5,7 @@ import time
 import sqlite3
 from datetime import datetime
 import pytz
-from cons import xml_url, token_tg, chat_id
+from cons import xml_url, token_tg, chat_id, chat_id_tmp
 
 bot = telebot.TeleBot(token_tg)
 
@@ -117,7 +117,9 @@ def parse_xml_and_save_to_db(url, db_file):
             time.sleep(300)
 
         except Exception as e:
-            print(f"Ошибка при обработке XML данных: {e}")
+            error_message = f"Ошибка при обработке XML данных: {e}"
+            print(error_message)
+            bot.send_message(chat_id=chat_id_tmp, text=error_message)
 
     conn.close()
 
