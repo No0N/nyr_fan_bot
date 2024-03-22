@@ -8,6 +8,7 @@ import pytz
 from cons import xml_url, token_tg, chat_id, chat_id_tmp
 
 bot = telebot.TeleBot(token_tg)
+error_sent = False
 
 def create_table_if_not_exists(conn):
     cursor = conn.cursor()
@@ -80,6 +81,7 @@ def send_message_to_channel():
         print(f"Ошибка при отправке сообщения: {e}")
 
 def parse_xml_and_save_to_db(url, db_file):
+    global error_sent
     conn = sqlite3.connect(db_file)
     create_table_if_not_exists(conn)
 
@@ -115,11 +117,13 @@ def parse_xml_and_save_to_db(url, db_file):
             send_message_to_channel()
 
             time.sleep(300)
+            error_sent = False
 
         except Exception as e:
             error_message = f"Ошибка при обработке XML данных: {e}"
             print(error_message)
             bot.send_message(chat_id=chat_id_tmp, text=error_message)
+            error_sent = True
 
     conn.close()
 
