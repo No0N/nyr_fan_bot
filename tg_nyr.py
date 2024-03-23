@@ -124,7 +124,7 @@ def parse_xml_and_save_to_db(url, db_file):
             print(error_message)
             bot.send_message(chat_id=chat_id_tmp, text=error_message)
             error_sent = True
-
+            time.sleep(300)
     conn.close()
 
 if __name__ == "__main__":
